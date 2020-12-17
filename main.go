@@ -25,13 +25,15 @@ type DevNode struct {
 }
 
 // Config ...
-var Config = struct {
+type baseConfig struct {
 	APPName string `default:"app name"`
 
 	Server string `default:"tcp://192.168.0.103:1883"`
 
 	Mqtt []DevNode
-}{}
+}
+
+var Config = baseConfig{}
 
 // main function.
 func main() {
@@ -77,28 +79,29 @@ func main() {
 			fmt.Println(time.Now(), "--", cc)
 			return
 		}
+		fmt.Println("traverse for")
 	}
+
+}
+
+func start(Config baseConfig, c_allCount chan<- int) {
 
 }
 
 func handleMeasure(ctx context.Context, client mqtt.Client, devNode DevNode, c_allCount chan<- int) {
 
-	type content struct {
-		Con float32 `json:"con"`
-	}
-
-	type payload struct {
-		Cin content `json:"m2m:cin"`
-	}
-
 	type reqMessage struct {
-		To  string  `json:"to"`
-		Fr  string  `json:"fr"`
-		Rqi string  `json:"rqi"`
-		Pc  payload `json:"pc"`
-		Op  int     `json:"op"`
-		Ty  int     `json:"ty"`
-		Sec int     `json:"sec"`
+		To  string `json:"to"`
+		Fr  string `json:"fr"`
+		Rqi string `json:"rqi"`
+		Pc  struct {
+			Cin struct {
+				Con float32 `json:"con"`
+			} `json:"m2m:cin"`
+		} `json:"pc"`
+		Op  int `json:"op"`
+		Ty  int `json:"ty"`
+		Sec int `json:"sec"`
 	}
 
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -109,23 +112,15 @@ func handleMeasure(ctx context.Context, client mqtt.Client, devNode DevNode, c_a
 		ramdonSerial++
 		rqiStr := fmt.Sprintf("472c-9d83-e22bx23-%d", ramdonSerial)
 
-		contentValue := &content{
-			randFloat(devNode.Min, devNode.Max),
-		}
-
-		payloadValue := &payload{
-			*contentValue,
-		}
-
 		reqMessageValue := &reqMessage{
-			devNode.Dev + "/" + devNode.Tag,
-			"SiotTestAE",
-			rqiStr,
-			*payloadValue,
-			1,
-			4,
-			0,
+			To:  devNode.Dev + "/" + devNode.Tag,
+			Fr:  "SiotTestAE",
+			Rqi: rqiStr,
+			Op:  1,
+			Ty:  4,
+			Sec: 0,
 		}
+		reqMessageValue.Pc.Cin.Con = randFloat(devNode.Min, devNode.Max)
 
 		brt, err := json.Marshal(reqMessageValue)
 		if err != nil {
