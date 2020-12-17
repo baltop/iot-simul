@@ -1,0 +1,26 @@
+appname: redcow ranch
+
+server: tcp://192.168.0.103:1883
+
+mqtt:
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AEb64ec457-484f-472c-9d83-e22bd3a96b4c
+  tag: temp
+  max: 30.0
+  min: -10.0
+  interval: 4000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AEb64ec457-484f-472c-9d83-e22bd3a96b4c
+  tag: waterlevel1
+  max: 3000.0
+  min: 1500.0
+  interval: 5000  
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AE0a95b8ed-4a29-4cf6-baa5-9eff53d0b73c
+  tag: humi
+  max: 100.0
+  min: 10.0
+  interval: 3000
+
