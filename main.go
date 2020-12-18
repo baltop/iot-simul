@@ -19,12 +19,11 @@ type DevNode struct {
 	Topic    string  `required:"true" yaml:"topic"`
 	Dev      string  `required:"true" yaml:"dev"`
 	Tag      string  `required:"true" yaml:"tag"`
-	Max      float32 `required:"true" yaml:"max"`
-	Min      float32 `required:"true" yaml:"min"`
+	Max      float32 `required:"false" yaml:"max"`
+	Min      float32 `required:"false" yaml:"min"`
 	Interval int     `required:"true" yaml:"interval"`
 }
 
-// Config ...
 type baseConfig struct {
 	APPName string `default:"app name"`
 
@@ -33,42 +32,46 @@ type baseConfig struct {
 	Mqtt []DevNode
 }
 
-var Config = baseConfig{}
+var config = baseConfig{}
 
 // main function.
 func main() {
 
-	ctx, cancel := context.WithCancel(context.Background())
+	var c_allCount chan int
+	var ctx context.Context
+	var cancel context.CancelFunc
 
 	error := configor.New(&configor.Config{
-		AutoReload:         false, // auto relaod 안되네....
-		AutoReloadInterval: 1 * time.Minute,
+		AutoReload:         true,
+		AutoReloadInterval: 15 * time.Second,
 		AutoReloadCallback: func(config interface{}) {
-			fmt.Printf("%v changed", config)
+			fmt.Printf("====================================\n%v changed \n", config)
+			fmt.Printf("====================================\n")
+			ss := config.(*baseConfig)
+			cancel()
+			c_allCount = make(chan int)
+			ctx, cancel = context.WithCancel(context.Background())
+			start(ctx, *ss, c_allCount)
+
 		},
-	}).Load(&Config, "config.yaml")
+	}).Load(&config, "config.yaml")
 
 	if error != nil {
 		log.Fatal(error)
 		os.Exit(1)
 	}
 
-	opts := mqtt.NewClientOptions().AddBroker(Config.Server)
-	client := mqtt.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		fmt.Println(token.Error())
-	}
-
 	sigs := make(chan os.Signal, 1)
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
 
-	c_allCount := make(chan int)
-	cc := 0
+	c_allCount = make(chan int)
 
-	for _, devNode := range Config.Mqtt {
-		go handleMeasure(ctx, client, devNode, c_allCount)
-	}
+	ctx, cancel = context.WithCancel(context.Background())
+
+	start(ctx, config, c_allCount)
+
+	cc := 0
 
 	for {
 		select {
@@ -79,16 +82,27 @@ func main() {
 			fmt.Println(time.Now(), "--", cc)
 			return
 		}
-		fmt.Println("traverse for")
 	}
 
 }
 
-func start(Config baseConfig, c_allCount chan<- int) {
+func start(ctx context.Context, config baseConfig, c_allCount chan<- int) {
 
+	fmt.Println("start startfunc")
+
+	opts := mqtt.NewClientOptions().AddBroker(config.Server)
+	client := mqtt.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		fmt.Println(token.Error())
+	}
+	for _, devNode := range config.Mqtt {
+		go handleMeasure(ctx, client, devNode, c_allCount)
+	}
 }
 
 func handleMeasure(ctx context.Context, client mqtt.Client, devNode DevNode, c_allCount chan<- int) {
+
+	fmt.Println("start handleMeasure", devNode.Tag)
 
 	type reqMessage struct {
 		To  string `json:"to"`
@@ -139,9 +153,10 @@ func handleMeasure(ctx context.Context, client mqtt.Client, devNode DevNode, c_a
 
 		select {
 		case <-ctx.Done(): // if cancel() execute
+			fmt.Println("canceled by context", devNode.Tag, devNode.Interval)
 			return
 		default:
-			fmt.Println("for loop")
+			fmt.Println("for loop", devNode.Tag, devNode.Interval)
 		}
 
 		time.Sleep(time.Duration(devNode.Interval) * time.Millisecond)

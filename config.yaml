@@ -8,19 +8,82 @@ mqtt:
   tag: temp
   max: 30.0
   min: -10.0
-  interval: 4000
+  interval: 9000
 
 - topic: /oneM2M/req/SiotTestAE/iotCore
   dev: /iotCore/AEb64ec457-484f-472c-9d83-e22bd3a96b4c
   tag: waterlevel1
   max: 3000.0
   min: 1500.0
-  interval: 5000  
+  interval: 10000  
 
 - topic: /oneM2M/req/SiotTestAE/iotCore
   dev: /iotCore/AE0a95b8ed-4a29-4cf6-baa5-9eff53d0b73c
   tag: humi
   max: 100.0
   min: 10.0
-  interval: 3000
+  interval: 9000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AE2e48f118-d4d4-47c2-92a5-a23ccfb026be
+  tag: Yard
+  max: 90000.0
+  min: 60000.0
+  interval: 18000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AE2e48f118-d4d4-47c2-92a5-a23ccfb026be
+  tag: Volt
+  max: 6.0
+  min: 2.0
+  interval: 8000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AE2e48f118-d4d4-47c2-92a5-a23ccfb026be
+  tag: Ampere
+  max: 8000.0
+  min: 6000.0
+  interval: 15000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AE5bed32c5-192c-4e42-b6e0-b768c2b512c6
+  tag: temp
+  max: 6.0
+  min: -4.0
+  interval: 9000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AE5bed32c5-192c-4e42-b6e0-b768c2b512c6
+  tag: Volt
+  max: 240.0
+  min: 180.0
+  interval: 9000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AE5bed32c5-192c-4e42-b6e0-b768c2b512c6
+  tag: Ampere
+  max: 1800.0
+  min: 1600.0
+  interval: 10000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AEaf6caada-1513-476c-b243-6c2c14ec8244
+  tag: win
+  max: 6.0
+  min: -40.0
+  interval: 10000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AEaf6caada-1513-476c-b243-6c2c14ec8244
+  tag: temp
+  max: 30.0
+  min: 10.0
+  interval: 12000
+
+- topic: /oneM2M/req/SiotTestAE/iotCore
+  dev: /iotCore/AEaf6caada-1513-476c-b243-6c2c14ec8244
+  tag: Yard
+  max: 600.0
+  min: 200.0
+  interval: 15000
 
